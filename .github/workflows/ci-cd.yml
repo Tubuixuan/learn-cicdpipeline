@@ -19,8 +19,6 @@ jobs:
       matrix:
         service:
           - product_service
-          - user_service
-
     steps:
       - name: Check out the code # Clone mã nguồn từ repo
         uses: actions/checkout@v3
