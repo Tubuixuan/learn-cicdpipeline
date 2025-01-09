@@ -1,0 +1,47 @@
+name: CI/CD Pipeline
+
+# Kích hoạt pipeline khi có các sự kiện sau:
+on:
+  push:
+    branches:
+      - main # Khi có push vào nhánh main
+  pull_request:
+    branches:
+      - main # Khi có pull request vào nhánh main
+
+jobs:
+  # Tên của công việc (job)
+  build-and-test:
+    runs-on: ubuntu-latest # Pipeline sẽ chạy trên môi trường Ubuntu
+
+    # Định nghĩa các service (product_service, user_service) để xử lý tuần tự
+    strategy:
+      matrix:
+        service:
+          - product_service
+          - user_service
+
+    steps:
+      - name: Check out the code # Clone mã nguồn từ repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python # Thiết lập Python environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9 # Sử dụng Python 3.9
+
+      - name: Install dependencies # Cài đặt thư viện từ requirements.txt
+        run: |
+          cd ${{ matrix.service }}  # Vào thư mục từng service
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Linter (flake8) # Kiểm tra cú pháp code
+        run: |
+          cd ${{ matrix.service }}
+          flake8 app.py
+
+      - name: Run Unit Tests # Chạy unit tests
+        run: |
+          cd ${{ matrix.service }}
+          pytest
